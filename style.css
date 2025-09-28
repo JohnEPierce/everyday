@@ -12,6 +12,11 @@ body {
 .holder {
 	height: 100vh;
 	background-color: white;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
 .mainpic {
 	min-width:480px;
@@ -24,6 +29,18 @@ body {
 	text-align: center;
 	font-size:4em;
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.loading {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* background-color: rgba(0, 0, 0, 0.6); */
+	color: #ffffff;
+	font-size: 2rem;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	z-index: 2;
 }
 @media (max-width: 768px) {
 	.mainpic {
