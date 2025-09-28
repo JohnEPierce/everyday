@@ -1,0 +1,38 @@
+@charset "UTF-8";
+/* CSS Document */
+
+html {
+	background-color: black;
+}
+
+body {
+	margin: 0 5vw;
+}
+
+.holder {
+	height: 100vh;
+	background-color: white;
+}
+.mainpic {
+	min-width:480px;
+	max-width: 90vw;
+	height: auto;
+	margin: 0 auto;
+	display: block;
+}
+.text {
+	text-align: center;
+	font-size:4em;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+@media (max-width: 768px) {
+	.mainpic {
+		max-width: 90vw;
+		min-width: auto;
+		height: auto;
+		max-height: 80vh;
+	}
+	.text {
+		font-size: 7vw;
+	}
+}

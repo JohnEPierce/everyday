@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<title>Photo everyday</title>
+</head>
+
+
+<body>
+<script type="text/javascript">
+ $(document).ready(function() {
+	var XCoords;
+	const startAgeDays = 3;
+		
+		const totalImages = 983;
+		const agePerImage = 1075/(totalImages-1);
+
+		function formatAge(days) {
+			let years = Math.floor(days / 365);
+			let rem   = days % 365;
+			let months = Math.floor(rem / 30.44);  // average month length
+			let d      = Math.floor(rem - (months * 30.44));
+
+			if (years > 0) {
+				return `${years} yr, ${months} months & ${d} days`;
+			} else {
+				return `${months} months & ${d} days`;
+			}
+		}
+
+		$(".holder").mousemove(function(event) {
+			let holderOffset = $(this).offset().left;
+			let holderWidth  = $(this).width();
+
+			// X position inside the holder
+			let relativeX = event.pageX - holderOffset;
+
+			// Normalise to frame index
+			let frameIndex = Math.min(totalImages - 1, Math.floor(relativeX * totalImages / holderWidth));
+
+			$(".mainpic").attr("src", "web/" + frameIndex + ".webp");
+
+			let ageInDays = startAgeDays + (frameIndex * agePerImage);
+			$(".text").text(formatAge(ageInDays));
+		});
+	
+ });
+</script>
+<div class="holder"><img class="mainpic"><div class="text" ></div></div>
+</body>
+</html>
