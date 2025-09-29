@@ -52,11 +52,10 @@
 			  updateFrameFromX(event.pageX);
 			});
 		
-			// Touch support strictly on holder
-			$(".holder").on("touchstart touchmove", function(event) {
-			  const touch = event.originalEvent.touches[0]; // first finger
-			  updateFrameFromX(touch.pageX);
-			  event.preventDefault(); // prevent page scroll while dragging
+			$(document).on("touchstart touchmove", function(event) {
+			const touch = event.originalEvent.touches[0];
+			updateFrameFromX(touch.pageX);
+			event.preventDefault(); // stops page from scrolling while dragging
 			});
 		  });
 		

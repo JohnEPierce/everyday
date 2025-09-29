@@ -38,8 +38,13 @@ body {
 @media (max-width: 768px) {
 	.text {
 		font-size: 7vw;
+		width: 100%;
 	}
 	body {
 		margin: 0 7vw;
+	}
+	video {
+		max-height: 80svh;
+		width: 100%;
 	}
 }
