@@ -11,61 +11,66 @@
 
 
 <body>
-<script type="text/javascript">
-$(document).ready(function() {
-  const startAgeDays = 3;
-  const endAgeDays = 1075;
-  const fps = 10; 
-  const video = document.getElementById("agevideo");
-  const textDisplay = $(".text");
-  const loadingIndicator = $(".loading");
-
-  video.addEventListener("loadedmetadata", () => {
-    loadingIndicator.fadeOut(200, function(){ $(this).remove(); });
-
-    $(document).on("mousemove", function(event) {
-  const holder      = $(".holder");
-  const holderOffset = holder.offset().left;
-  const holderWidth  = holder.width();
-  const totalFrames  = 983;
-
-  let frameIndex;
-
-  // cursor X relative to viewport
-  const mouseX = event.pageX;
-  const leftEdge  = holderOffset;
-  const rightEdge = holderOffset + holderWidth;
-
-  if (mouseX < leftEdge) {
-    // left body margin
-    frameIndex = 0;
-  } else if (mouseX > rightEdge) {
-    // right body margin
-    frameIndex = totalFrames - 1;
-  } else {
-    // inside holder
-    const relativeX = mouseX - leftEdge;
-    frameIndex = Math.round(relativeX * (totalFrames - 1) / holderWidth);
-  }
-
-  // update video and age
-  video.currentTime = frameIndex / fps;
-  const ageInDays = startAgeDays + frameIndex * ((endAgeDays - startAgeDays) / (totalFrames - 1));
-  textDisplay.text(formatAge(ageInDays));
-});
-  });
-
-  function formatAge(days) {
-    const years = Math.floor(days / 365);
-    const rem   = days - years*365;
-    const months = Math.floor(rem / 30.44);
-    const d      = Math.floor(rem - months*30.44);
-    return years > 0
-      ? `${years} yr, ${months} months & ${d} days`
-      : `${months} months & ${d} days`;
-  }
-});
-</script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+		  const startAgeDays = 3;
+		  const endAgeDays = 1075;
+		  const fps = 10;
+		  const video = document.getElementById("agevideo");
+		  const textDisplay = $(".text");
+		  const loadingIndicator = $(".loading");
+		
+		  function updateFrameFromX(mouseX) {
+			const holder       = $(".holder");
+			const holderOffset = holder.offset().left;
+			const holderWidth  = holder.width();
+			const totalFrames  = 983;
+		
+			let frameIndex;
+			const leftEdge  = holderOffset;
+			const rightEdge = holderOffset + holderWidth;
+		
+			if (mouseX < leftEdge) {
+			  frameIndex = 0;
+			} else if (mouseX > rightEdge) {
+			  frameIndex = totalFrames - 1;
+			} else {
+			  const relativeX = mouseX - leftEdge;
+			  frameIndex = Math.round(relativeX * (totalFrames - 1) / holderWidth);
+			}
+		
+			video.currentTime = frameIndex / fps;
+			const ageInDays = startAgeDays + frameIndex * ((endAgeDays - startAgeDays) / (totalFrames - 1));
+			textDisplay.text(formatAge(ageInDays));
+		  }
+		
+		  video.addEventListener("loadedmetadata", () => {
+			loadingIndicator.fadeOut(200, function(){ $(this).remove(); });
+		
+			// Mouse support across whole window
+			$(document).on("mousemove", function(event) {
+			  updateFrameFromX(event.pageX);
+			});
+		
+			// Touch support strictly on holder
+			$(".holder").on("touchstart touchmove", function(event) {
+			  const touch = event.originalEvent.touches[0]; // first finger
+			  updateFrameFromX(touch.pageX);
+			  event.preventDefault(); // prevent page scroll while dragging
+			});
+		  });
+		
+		  function formatAge(days) {
+			const years  = Math.floor(days / 365);
+			const rem    = days - years*365;
+			const months = Math.floor(rem / 30.44);
+			const d      = Math.floor(rem - months*30.44);
+			return years > 0
+			  ? `${years} yr, ${months} months & ${d} days`
+			  : `${months} months & ${d} days`;
+		  }
+		});
+		</script>
 <div class="holder">
 	<div class="loading">Loading images...</div>
 	<video id="agevideo" preload="auto" playsinline muted>
