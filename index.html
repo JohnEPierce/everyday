@@ -12,84 +12,51 @@
 
 <body>
 <script type="text/javascript">
- $(document).ready(function() {
-	const startAgeDays = 3;
-		
-	const totalImages = 983;
-	const agePerImage = 1075/(totalImages-1);
-	const mainImage = $(".mainpic");
-	const loadingIndicator = $(".loading");
-	const textDisplay = $(".text");
+$(document).ready(function() {
+  const startAgeDays = 3;
+  const endAgeDays = 1075;
+  const fps = 10; 
+  const video = document.getElementById("agevideo");
+  const textDisplay = $(".text");
+  const loadingIndicator = $(".loading");
 
-	textDisplay.text(formatAge(startAgeDays));
+  video.addEventListener("loadedmetadata", () => {
+    loadingIndicator.fadeOut(200, function(){ $(this).remove(); });
 
-	function preloadImages(onComplete) {
-		const cache = [];
-		const schedule = window.requestIdleCallback
-			? (cb) => requestIdleCallback(cb, { timeout: 200 })
-			: (cb) => setTimeout(cb, 0);
+    $(".holder").on("mousemove", function(event) {
+      const relativeX = Math.min(Math.max(0, event.offsetX), this.clientWidth);
+      const ratio = relativeX / this.clientWidth;
 
-		const loadNext = (index) => {
-			if (index >= totalImages) {
-				if (typeof onComplete === "function") {
-					onComplete();
-				}
-				return;
-			}
+      // total frames = duration * fps
+      const totalFrames = 983;
+      const frameIndex = Math.round(ratio * (totalFrames - 1));
+		video.currentTime = frameIndex / fps;
 
-			const img = new Image();
-			img.decoding = "async";
-			const advance = () => schedule(() => loadNext(index + 1));
-			img.onload = advance;
-			img.onerror = advance;
-			img.src = `web/${index}.webp`;
-			cache.push(img);
-		};
+      // Map frame index to age
+      const ageInDays = startAgeDays + frameIndex * ((endAgeDays - startAgeDays) / (totalFrames - 1));
+      textDisplay.text(formatAge(ageInDays));
+    });
+  });
 
-		loadNext(0);
-	}
-
-	preloadImages(() => {
-		loadingIndicator.fadeOut(200, function() {
-			$(this).remove();
-		});
-	});
-
-		function formatAge(days) {
-			let years = Math.floor(days / 365);
-			let rem   = days % 365;
-			let months = Math.floor(rem / 30.44);  // average month length
-			let d      = Math.floor(rem - (months * 30.44));
-
-			if (years > 0) {
-				return `${years} yr, ${months} months & ${d} days`;
-			} else {
-				return `${months} months & ${d} days`;
-			}
-		}
-
-		$(".holder").mousemove(function(event) {
-			let holderOffset = $(this).offset().left;
-			let holderWidth  = $(this).width();
-
-			// X position inside the holder
-			let relativeX = event.pageX - holderOffset;
-
-			// Normalise to frame index
-			let frameIndex = Math.min(totalImages - 1, Math.floor(relativeX * totalImages / holderWidth));
-
-			mainImage.attr("src", "web/" + frameIndex + ".webp");
-
-			let ageInDays = startAgeDays + (frameIndex * agePerImage);
-			textDisplay.text(formatAge(ageInDays));
-		});
-	
- });
+  function formatAge(days) {
+    const years = Math.floor(days / 365);
+    const rem   = days - years*365;
+    const months = Math.floor(rem / 30.44);
+    const d      = Math.floor(rem - months*30.44);
+    return years > 0
+      ? `${years} yr, ${months} months & ${d} days`
+      : `${months} months & ${d} days`;
+  }
+});
 </script>
 <div class="holder">
 	<div class="loading">Loading images...</div>
-	<img class="mainpic" src="web/0.webp" alt="Daily photo sequence">
+	<video id="agevideo" preload="auto" playsinline muted>
+	  <source src="son-age.webm" type="video/webm">
+	  <source src="son-age.mp4" type="video/mp4">
+	  Your browser does not support the video tag.
+	</video>
 	<div class="text"></div>
-</div>
+  </div>
 </body>
 </html>
