@@ -23,19 +23,36 @@ $(document).ready(function() {
   video.addEventListener("loadedmetadata", () => {
     loadingIndicator.fadeOut(200, function(){ $(this).remove(); });
 
-    $(".holder").on("mousemove", function(event) {
-      const relativeX = Math.min(Math.max(0, event.offsetX), this.clientWidth);
-      const ratio = relativeX / this.clientWidth;
+    $(document).on("mousemove", function(event) {
+  const holder      = $(".holder");
+  const holderOffset = holder.offset().left;
+  const holderWidth  = holder.width();
+  const totalFrames  = 983;
 
-      // total frames = duration * fps
-      const totalFrames = 983;
-      const frameIndex = Math.round(ratio * (totalFrames - 1));
-		video.currentTime = frameIndex / fps;
+  let frameIndex;
 
-      // Map frame index to age
-      const ageInDays = startAgeDays + frameIndex * ((endAgeDays - startAgeDays) / (totalFrames - 1));
-      textDisplay.text(formatAge(ageInDays));
-    });
+  // cursor X relative to viewport
+  const mouseX = event.pageX;
+  const leftEdge  = holderOffset;
+  const rightEdge = holderOffset + holderWidth;
+
+  if (mouseX < leftEdge) {
+    // left body margin
+    frameIndex = 0;
+  } else if (mouseX > rightEdge) {
+    // right body margin
+    frameIndex = totalFrames - 1;
+  } else {
+    // inside holder
+    const relativeX = mouseX - leftEdge;
+    frameIndex = Math.round(relativeX * (totalFrames - 1) / holderWidth);
+  }
+
+  // update video and age
+  video.currentTime = frameIndex / fps;
+  const ageInDays = startAgeDays + frameIndex * ((endAgeDays - startAgeDays) / (totalFrames - 1));
+  textDisplay.text(formatAge(ageInDays));
+});
   });
 
   function formatAge(days) {
