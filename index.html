@@ -14,17 +14,37 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 		  const startAgeDays = 3;
-		  const endAgeDays = 1075;
-		  const fps = 10;
-		  const video = document.getElementById("agevideo");
-		  const textDisplay = $(".text");
+		  const endAgeDays   = 1075;   // 2y 11m 9d in days
+		  const fps          = 5;      // match your encoding framerate
+		  const totalFrames  = 983;    // number of input images
+		  const video        = document.getElementById("agevideo");
+		  const textDisplay  = $(".text");
 		  const loadingIndicator = $(".loading");
+		
+		  // --- rAF seek scheduling ---
+		  let targetTime = null;
+		  let ticking = false;
+		
+		  function applySeek() {
+			if (targetTime !== null) {
+			  video.currentTime = targetTime;
+			  targetTime = null;
+			}
+			ticking = false;
+		  }
+		
+		  function requestSeek(time) {
+			targetTime = time;
+			if (!ticking) {
+			  requestAnimationFrame(applySeek);
+			  ticking = true;
+			}
+		  }
 		
 		  function updateFrameFromX(mouseX) {
 			const holder       = $(".holder");
 			const holderOffset = holder.offset().left;
 			const holderWidth  = holder.width();
-			const totalFrames  = 983;
 		
 			let frameIndex;
 			const leftEdge  = holderOffset;
@@ -39,23 +59,34 @@
 			  frameIndex = Math.round(relativeX * (totalFrames - 1) / holderWidth);
 			}
 		
-			video.currentTime = frameIndex / fps;
+			// ✅ schedule the seek
+			requestSeek(frameIndex / fps);
+		
+			// update age text immediately
 			const ageInDays = startAgeDays + frameIndex * ((endAgeDays - startAgeDays) / (totalFrames - 1));
 			textDisplay.text(formatAge(ageInDays));
 		  }
 		
+		  // --- unlock video on first touch (Safari fix) ---
+		  $(".holder").on("touchstart", function() {
+			if (video.paused) {
+			  video.play().then(() => video.pause());
+			}
+		  });
+		
 		  video.addEventListener("loadedmetadata", () => {
 			loadingIndicator.fadeOut(200, function(){ $(this).remove(); });
 		
-			// Mouse support across whole window
+			// Mouse support (across whole window)
 			$(document).on("mousemove", function(event) {
 			  updateFrameFromX(event.pageX);
 			});
 		
+			// Touch support (across whole window too)
 			$(document).on("touchstart touchmove", function(event) {
-			const touch = event.originalEvent.touches[0];
-			updateFrameFromX(touch.pageX);
-			event.preventDefault(); // stops page from scrolling while dragging
+			  const touch = event.originalEvent.touches[0];
+			  updateFrameFromX(touch.pageX);
+			  event.preventDefault(); // stop page scrolling
 			});
 		  });
 		
